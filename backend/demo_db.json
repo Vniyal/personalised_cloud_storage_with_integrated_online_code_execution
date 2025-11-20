@@ -1,0 +1,11 @@
+{
+  "users": [],
+  "files": [
+    {
+      "file_id": "a61f28ee-4d6a-49b4-b411-daea8ecdf252",
+      "user_id": "testuser",
+      "file_name": "tryue.py.rtf",
+      "s3_url": "demo_local_file"
+    }
+  ]
+}

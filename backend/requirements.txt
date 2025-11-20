@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-jose
+passlib[bcrypt]
+python-multipart
+supabase
+Werkzeug
+bcrypt==4.0.1
+
