@@ -13,17 +13,16 @@ from werkzeug.utils import secure_filename # Used for sanitizing filenames
 # New Security/Execution Imports (These files must be in the same directory)
 from auth import authenticate_user, create_access_token, decode_access_token
 from rate_limiter import RateLimiter
-from execut0r import run_user_file, MAX_FILE_SIZE
+from executer import run_user_file, MAX_FILE_SIZE
 from logger_db import fetch_recent, init_db
 
 # --- CONFIGURATION ---
 # Supabase settings (from your old app.py)
 SUPABASE_URL = "https://jukispcmvqxpytjdutfx.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a2lzcGNtdnF4cHl0amR1dGZ4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTg0MzIzOSwiZXhwIjoyMDc1NDE5MjM5fQ.hBdCfY_mh6ZlDShxKVj9AV0f10IzQRd5YnwYHrOa9z0"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1a2lzcGNtdnF4cHl0amR1dGZ4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTg0MzIzOSwiZXhwIjoyMDc1NDE5MjM5fQ.hBdCfY_mh6ZlDS>
 
 # Initialize Supabase client
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 # FastAPI and Security Setup
 app = FastAPI(title="Secure Code Execution & File Service")
 app.add_middleware(
@@ -58,7 +57,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Dict[str, Any]:
 
 @app.post("/token", tags=["Authentication"])
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    """Handles user login and returns a JWT access token."""
+"""Handles user login and returns a JWT access token."""
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
@@ -71,7 +70,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 async def execute(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """Accepts a file, runs it in a secure sandbox, and returns the result."""
     # Basic filename checks
-    if not file.filename.endswith((".py", ".c")):
+    if not file.filename.endswith((".py", ".c",".cpp",".java",".json")):
         raise HTTPException(status_code=400, detail="Only .py or .c files allowed")
         
     contents = await file.read()
@@ -143,7 +142,7 @@ async def upload_file(
         supabase.storage.from_("user-files").upload(filename, file_content)
 
         # Store metadata in DB
-        supabase.table("files").insert({
+ supabase.table("files").insert({
             "user_id": user_id,
             "filename": filename,
             "path": f"user-files/{filename}"
@@ -192,4 +191,4 @@ async def list_files(current_user: dict = Depends(get_current_user)):
             return [f["filename"] for f in res.data]
         return []
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error listing files: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error listing files: {str(e)}") 
